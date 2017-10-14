@@ -27,7 +27,7 @@ public class Author {
     this.name = name;
   }
 
-  private static long nextLong() {
+  private static synchronized long nextLong() {
     return count++;
   }
 

@@ -3,63 +3,44 @@ package cir.cirviz.data;
 import cir.cirviz.data.model.Author;
 import cir.cirviz.data.model.Paper;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PaperRepository {
 
-  private Map<String, Paper> papers = new HashMap<>();
+  private static Logger logger = LoggerFactory.getLogger(PaperRepository.class);
 
-  private Map<String, Author> authors = new HashMap<>();
+  private ConcurrentMap<String, Paper> papers = new ConcurrentHashMap<>();
 
-  private Map<String, List<Author>> paperToAuthors = new HashMap<>();
+  private ConcurrentMap<String, Author> authors = new ConcurrentHashMap<>();
 
-  private Map<String, List<Paper>> authorToPapers = new HashMap<>();
+  private ConcurrentMap<String, List<Author>> paperToAuthors = new ConcurrentHashMap<>();
 
-  private Map<String, List<Paper>> inCitations = new HashMap<>();
+  private ConcurrentMap<String, List<Paper>> authorToPapers = new ConcurrentHashMap<>();
 
-  private Map<String, List<Paper>> outCitations = new HashMap<>();
+  private ConcurrentMap<String, List<Paper>> inCitations = new ConcurrentHashMap<>();
 
-  private Map<String, List<Paper>> keyPhraseToPapers = new HashMap<>();
+  private ConcurrentMap<String, List<Paper>> outCitations = new ConcurrentHashMap<>();
 
-  private Map<String, List<Paper>> venueToPapers = new HashMap<>();
+  private ConcurrentMap<String, List<Paper>> keyPhraseToPapers = new ConcurrentHashMap<>();
 
-  private Map<Integer, List<Paper>> yearToPapers = new HashMap<>();
+  private ConcurrentMap<String, List<Paper>> venueToPapers = new ConcurrentHashMap<>();
+
+  private ConcurrentMap<Integer, List<Paper>> yearToPapers = new ConcurrentHashMap<>();
 
   public void addPaper(Paper paper) {
     String id = paper.getId();
     papers.put(id, paper);
   }
 
-  public void buildRelations() {
-    papers.values().forEach(paper -> {
-      paper.getAuthors().forEach(author -> {
-        addAuthor(author);
-        buildPaperAuthorRelation(paper, author);
-      });
-
-      paper.getInCitations().forEach(inCitationId -> {
-        Paper citingPaper = papers.get(inCitationId);
-        if (citingPaper != null) {
-          buildCitationRelation(citingPaper, paper);
-        }
-      });
-
-      paper.getOutCitations().forEach(outCitationId -> {
-        Paper citedPaper = papers.get(outCitationId);
-        if (outCitationId != null) {
-          buildCitationRelation(paper, citedPaper);
-        }
-      });
-
-      paper.getKeyPhrases().forEach(keyPhrase -> buildPaperKeyPhraseRelation(paper, keyPhrase));
-
-      buildPaperVenueRelation(paper, paper.getVenue());
-      buildYearVenueRelation(paper, paper.getYear());
-    });
+  private static <K, V> void preprocessMapToList(ConcurrentMap<K, List<V>> map, K key) {
+    map.putIfAbsent(key, Collections.synchronizedList(new ArrayList<>()));
   }
 
   private void addAuthor(Author author) {
@@ -67,54 +48,82 @@ public class PaperRepository {
     authors.put(id, author);
   }
 
+  public void buildRelations() {
+    papers.values()
+        .parallelStream()
+        .forEach(paper -> {
+          paper.getAuthors()
+              .parallelStream()
+              .forEach(author -> {
+                addAuthor(author);
+                buildPaperAuthorRelation(paper, author);
+              });
+
+          paper.getInCitations()
+              .parallelStream()
+              .forEach(inCitationId -> {
+                Paper citingPaper = papers.get(inCitationId);
+                if (citingPaper != null) {
+                  buildCitationRelation(citingPaper, paper);  // Ignoring non-existing papers
+                }
+              });
+
+          paper.getOutCitations()
+              .parallelStream()
+              .forEach(outCitationId -> {
+                Paper citedPaper = papers.get(outCitationId);
+                if (citedPaper != null) {
+                  buildCitationRelation(paper, citedPaper); // Ignoring non-existing papers
+                }
+              });
+
+          paper.getKeyPhrases()
+              .parallelStream()
+              .forEach(keyPhrase -> buildPaperKeyPhraseRelation(paper, keyPhrase));
+
+          buildPaperVenueRelation(paper, paper.getVenue());
+          buildYearVenueRelation(paper, paper.getYear());
+
+          logger.info("Finished paper: " + paper.getId());
+        });
+  }
+
   private void buildPaperAuthorRelation(Paper paper, Author author) {
     String paperId = paper.getId();
     String authorId = author.getId();
 
-    if (!paperToAuthors.containsKey(paperId)) {
-      paperToAuthors.put(paperId, new ArrayList<>());
-    }
+    preprocessMapToList(paperToAuthors, paperId);
     paperToAuthors.get(paperId).add(author);
 
-    if (!authorToPapers.containsKey(authorId)) {
-      authorToPapers.put(authorId, new ArrayList<>());
-    }
+    preprocessMapToList(authorToPapers, authorId);
     authorToPapers.get(authorId).add(paper);
   }
 
   private void buildCitationRelation(Paper citingPaper, Paper citedPaper) {
-    String paperId = citingPaper.getId();
+    // InCitations: citedPaperId -> List of papers citing this one
+    // OutCitations: citingPaperId -> List of papers this one is citing
+    String citingPaperId = citingPaper.getId();
     String citedPaperId = citedPaper.getId();
 
-    if (!inCitations.containsKey(citedPaperId)) {
-      inCitations.put(citedPaperId, new ArrayList<>());
-    }
+    preprocessMapToList(inCitations, citedPaperId);
     inCitations.get(citedPaperId).add(citingPaper);
 
-    if (!outCitations.containsKey(paperId)) {
-      outCitations.put(paperId, new ArrayList<>());
-    }
-    outCitations.get(paperId).add(citedPaper);
+    preprocessMapToList(outCitations, citingPaperId);
+    outCitations.get(citingPaperId).add(citedPaper);
   }
 
   private void buildPaperKeyPhraseRelation(Paper paper, String keyPhrase) {
-    if (!keyPhraseToPapers.containsKey(keyPhrase)) {
-      keyPhraseToPapers.put(keyPhrase, new ArrayList<>());
-    }
+    preprocessMapToList(keyPhraseToPapers, keyPhrase);
     keyPhraseToPapers.get(keyPhrase).add(paper);
   }
 
   private void buildPaperVenueRelation(Paper paper, String venue) {
-    if (!venueToPapers.containsKey(venue)) {
-      venueToPapers.put(venue, new ArrayList<>());
-    }
+    preprocessMapToList(venueToPapers, venue);
     venueToPapers.get(venue).add(paper);
   }
 
   private void buildYearVenueRelation(Paper paper, int year) {
-    if (!yearToPapers.containsKey(year)) {
-      yearToPapers.put(year, new ArrayList<>());
-    }
+    preprocessMapToList(yearToPapers, year);
     yearToPapers.get(year).add(paper);
   }
 }
