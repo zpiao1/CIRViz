@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,5 +121,33 @@ public class Paper {
       logger.warn("Error in writing Author: " + e.getMessage());
     }
     return super.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Paper)) {
+      return false;
+    }
+    Paper paper = (Paper) o;
+    return getYear() == paper.getYear() &&
+        Objects.equals(getAuthors(), paper.getAuthors()) &&
+        Objects.equals(getId(), paper.getId()) &&
+        Objects.equals(getInCitations(), paper.getInCitations()) &&
+        Objects.equals(getKeyPhrases(), paper.getKeyPhrases()) &&
+        Objects.equals(getOutCitations(), paper.getOutCitations()) &&
+        Objects.equals(getPaperAbstract(), paper.getPaperAbstract()) &&
+        Objects.equals(getPdfUrls(), paper.getPdfUrls()) &&
+        Objects.equals(getS2Url(), paper.getS2Url()) &&
+        Objects.equals(getTitle(), paper.getTitle()) &&
+        Objects.equals(getVenue(), paper.getVenue());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getAuthors(), getId(), getInCitations(), getKeyPhrases(), getOutCitations(),
+        getPaperAbstract(), getPdfUrls(), getS2Url(), getTitle(), getVenue(), getYear());
   }
 }

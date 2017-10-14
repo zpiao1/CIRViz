@@ -24,4 +24,4 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
-/src/main/resources/static/dataset.json
+/src/main/resources/data/dataset.json

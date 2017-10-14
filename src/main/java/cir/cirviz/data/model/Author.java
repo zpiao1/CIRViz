@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class Author {
   public String getId() {
     if (getIds().size() <= 0) {
       long id = nextLong();
-      logger.warn("Author: " + getName() + " has no id, assigning one: " + id);
+      logger.warn("Author: " + getName() + " has no id, assigning one: a" + id);
       ids.add("a" + id);
     }
     return getIds().get(0);
@@ -59,5 +60,23 @@ public class Author {
       logger.warn("Error in writing Author: " + e.getMessage());
     }
     return super.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Author)) {
+      return false;
+    }
+    Author author = (Author) o;
+    return Objects.equals(getIds(), author.getIds()) &&
+        Objects.equals(getName(), author.getName());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getIds(), getName());
   }
 }
