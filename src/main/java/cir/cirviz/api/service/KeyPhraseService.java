@@ -1,6 +1,6 @@
 package cir.cirviz.api.service;
 
-import cir.cirviz.data.model.Paper;
+import cir.cirviz.data.entity.Paper;
 import java.util.List;
 
 public interface KeyPhraseService {

@@ -1,7 +1,7 @@
 package cir.cirviz.api.service;
 
 import cir.cirviz.data.PaperRepository;
-import cir.cirviz.data.model.Paper;
+import cir.cirviz.data.entity.Paper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

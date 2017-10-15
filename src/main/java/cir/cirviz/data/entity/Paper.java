@@ -1,4 +1,4 @@
-package cir.cirviz.data.model;
+package cir.cirviz.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

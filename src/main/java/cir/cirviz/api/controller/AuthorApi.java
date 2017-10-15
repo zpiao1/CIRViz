@@ -1,7 +1,7 @@
 package cir.cirviz.api.controller;
 
-import cir.cirviz.data.model.Author;
-import cir.cirviz.data.model.Paper;
+import cir.cirviz.data.entity.Author;
+import cir.cirviz.data.entity.Paper;
 import java.util.List;
 
 public interface AuthorApi {
@@ -13,17 +13,61 @@ public interface AuthorApi {
       long limit
   );
 
+  long getAuthorsCount();
+
   Author getAuthorById(String authorId);
 
-  List<Paper> getPapersByAuthor(String authorId);
+  List<Paper> getPapersByAuthor(
+      String authorId,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
 
-  List<Integer> getYearsOfPapersByAuthor(String authorId);
+  long getPapersCountByAuthor(String authorId);
 
-  List<String> getKeyPhrasesOfPapersByAuthor(String authorId);
+  List<Integer> getYearsOfPapersByAuthor(
+      String authorId,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
 
-  List<String> getVenuesOfPapersByAuthor(String authorId);
+  long getYearsOfPapersCountByAuthor(String authorId);
 
-  List<Paper> getCitedPapersWrittenByAuthor(String authorId);
+  List<String> getKeyPhrasesOfPapersByAuthor(
+      String authorId,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
 
-  List<Paper> getPapersCitedByAuthor(String authorId);
+  long getKeyPhrasesCountOfPapersByAuthor(String authorId);
+
+  List<String> getVenuesOfPapersByAuthor(
+      String authorId,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
+
+  long getVenuesCountOfPapersByAuthor(String authorId);
+
+  List<Paper> getCitedPapersWrittenByAuthor(
+      String authorId,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
+
+  long getCitedPapersCountWrittenByAuthor(String authorId);
+
+  List<Paper> getPapersCitedByAuthor(
+      String authorId,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
+
+  long getPapersCountCitedByAuthor(String authorId);
 }

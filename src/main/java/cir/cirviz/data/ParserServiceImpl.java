@@ -1,6 +1,6 @@
 package cir.cirviz.data;
 
-import cir.cirviz.data.model.Paper;
+import cir.cirviz.data.entity.Paper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

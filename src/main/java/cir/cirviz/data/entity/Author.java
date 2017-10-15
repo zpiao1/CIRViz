@@ -1,4 +1,4 @@
-package cir.cirviz.data.model;
+package cir.cirviz.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class Author {
 
   private static Logger logger = LoggerFactory.getLogger(Author.class);
-  private static long count = 0L;
+  private static AtomicLong count = new AtomicLong(0L);
   @JsonProperty("ids")
   private List<String> ids = Collections.emptyList();
   @JsonProperty("name")
@@ -28,8 +29,8 @@ public class Author {
     this.name = name;
   }
 
-  private static synchronized long nextLong() {
-    return count++;
+  private static long nextLong() {
+    return count.getAndIncrement();
   }
 
   @JsonProperty("ids")

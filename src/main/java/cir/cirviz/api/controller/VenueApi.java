@@ -1,24 +1,72 @@
 package cir.cirviz.api.controller;
 
-import cir.cirviz.data.model.Author;
-import cir.cirviz.data.model.Paper;
+import cir.cirviz.data.entity.Author;
+import cir.cirviz.data.entity.Paper;
 import java.util.List;
 
 public interface VenueApi {
 
-  List<String> getVenues();
+  List<String> getVenues(
+      String orderBy,
+      boolean asc,
+      long limit
+  );
+
+  long getVenuesCount();
 
   String getVenue(String venue);
 
-  List<Paper> getPapersByVenue(String venue);
+  List<Paper> getPapersByVenue(
+      String venue,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
 
-  List<Author> getAuthorsByVenue(String venue);
+  long getPapersCountByVenue(String venue);
 
-  List<Integer> getYearsByVenue(String venue);
+  List<Author> getAuthorsByVenue(
+      String venue,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
 
-  List<String> getKeyPhrasesByVenue(String venue);
+  long getAuthorsCountByVenue(String venue);
 
-  List<Paper> getCitationsByVenue(String venue);
+  List<Integer> getYearsByVenue(
+      String venue,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
 
-  List<Paper> getPapersCitingPapersAtVenue(String venue);
+  long getYearsCountByVenue(String venue);
+
+  List<String> getKeyPhrasesByVenue(
+      String venue,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
+
+  long getKeyPhrasesCountByVenue(String venue);
+
+  List<Paper> getCitationsByVenue(
+      String venue,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
+
+  long getCitationsCountByVenue(String venue);
+
+  List<Paper> getPapersCitingPapersAtVenue(
+      String venue,
+      String orderBy,
+      boolean asc,
+      long limit
+  );
+
+  long getPapersCountCitingPapersAtVenue(String venue);
 }

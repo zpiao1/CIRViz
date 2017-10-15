@@ -1,7 +1,7 @@
 package cir.cirviz.data;
 
-import cir.cirviz.data.model.Author;
-import cir.cirviz.data.model.Paper;
+import cir.cirviz.data.entity.Author;
+import cir.cirviz.data.entity.Paper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
