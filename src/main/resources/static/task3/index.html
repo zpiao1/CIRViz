@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  .axis--x path {
+    display: none;
+  }
+
+  .tooltip {
+    background: #eee;
+    box-shadow: 0 0 5px #999999;
+    color: #333;
+    display: none;
+    font-size: 12px;
+    left: 130px;
+    padding: 10px;
+    position: absolute;
+    text-align: center;
+    top: 95px;
+    z-index: 10;
+  }
+</style>
+<div>
+  <input type="radio" id="chartChoice1" name="chart" value="radialBar" checked>
+  <label for="chartChoice1">Radial Chart</label>
+  <input type="radio" id="chartChoice2" name="chart" value="barChart">
+  <label for="chartChoice2">Bar Chart</label>
+</div>
+<div id="chart">
+  <svg width="960" height="500" id="barChart" style="display:none"></svg>
+  <svg width="960" height="960" font-family="Roboto,sans-serif" font-size="12"
+       id="radialBar" style="display:inline"></svg>
+</div>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="task3.js"></script>
+<script src="d3-scale-radial.js"></script>
+<script src="task3-bar-chart.js"></script>
+<script src="task3-radial-bar.js"></script>
