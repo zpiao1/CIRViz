@@ -4,6 +4,7 @@ import cir.cirviz.data.entity.Author;
 import cir.cirviz.data.entity.Paper;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,41 +57,7 @@ public class PaperRepositoryImpl implements PaperRepository {
   private void buildRelations() {
     papers.values()
         .parallelStream()
-        .forEach(paper -> {
-          paper.getAuthors()
-              .parallelStream()
-              .forEach(author -> {
-                addAuthor(author);
-                buildPaperAuthorRelation(paper, author);
-              });
-
-          paper.getInCitations()
-              .parallelStream()
-              .forEach(inCitationId -> {
-                Paper citingPaper = papers.get(inCitationId);
-                if (citingPaper != null) {
-                  buildCitationRelation(citingPaper, paper);  // Ignoring non-existing papers
-                }
-              });
-
-          paper.getOutCitations()
-              .parallelStream()
-              .forEach(outCitationId -> {
-                Paper citedPaper = papers.get(outCitationId);
-                if (citedPaper != null) {
-                  buildCitationRelation(paper, citedPaper); // Ignoring non-existing papers
-                }
-              });
-
-          paper.getKeyPhrases()
-              .parallelStream()
-              .forEach(keyPhrase -> buildPaperKeyPhraseRelation(paper, keyPhrase));
-
-          buildPaperVenueRelation(paper, paper.getVenue());
-          buildYearVenueRelation(paper, paper.getYear());
-
-          logger.info("Finished paper: " + paper.getId());
-        });
+        .forEach(this::buildRelationForPaper);
   }
 
   private void buildPaperAuthorRelation(Paper paper, Author author) {
@@ -166,5 +133,47 @@ public class PaperRepositoryImpl implements PaperRepository {
 
   public Map<Integer, List<Paper>> getYearToPapers() {
     return yearToPapers;
+  }
+
+  private void buildRelationForPaper(Paper paper) {
+    paper.getAuthors()
+        .parallelStream()
+        .forEach(author -> {
+          addAuthor(author);
+          buildPaperAuthorRelation(paper, author);
+        });
+
+    List<String> inCitations = paper.getInCitations();
+    Iterator<String> inCitationsIterator = inCitations.iterator();
+    while (inCitationsIterator.hasNext()) {
+      String inCitationId = inCitationsIterator.next();
+      Paper citingPaper = papers.get(inCitationId);
+      if (citingPaper != null) {
+        buildCitationRelation(citingPaper, paper);
+      } else {
+        inCitationsIterator.remove(); // Remove IDs of non-existing papers
+      }
+    }
+
+    List<String> outCitations = paper.getOutCitations();
+    Iterator<String> outCitationsIterator = outCitations.iterator();
+    while (outCitationsIterator.hasNext()) {
+      String outCitationId = outCitationsIterator.next();
+      Paper citedPaper = papers.get(outCitationId);
+      if (citedPaper != null) {
+        buildCitationRelation(paper, citedPaper);
+      } else {
+        outCitationsIterator.remove(); // Remove IDs of non-existing papers
+      }
+    }
+
+    paper.getKeyPhrases()
+        .parallelStream()
+        .forEach(keyPhrase -> buildPaperKeyPhraseRelation(paper, keyPhrase));
+
+    buildPaperVenueRelation(paper, paper.getVenue());
+    buildYearVenueRelation(paper, paper.getYear());
+
+    logger.info("Finished paper: " + paper.getId());
   }
 }

@@ -2,6 +2,7 @@ package cir.cirviz.api.util;
 
 import cir.cirviz.api.service.AuthorService;
 import cir.cirviz.api.service.KeyPhraseService;
+import cir.cirviz.api.service.PaperService;
 import cir.cirviz.api.service.VenueService;
 import cir.cirviz.api.service.YearService;
 import cir.cirviz.data.entity.Author;
@@ -19,6 +20,7 @@ public class ModelComparators {
   private final YearService yearService;
   private final KeyPhraseService keyPhraseService;
   private final VenueService venueService;
+  private final PaperService paperService;
 
   private final Map<String, Comparator<Paper>> paperComparatorMap = new HashMap<>();
   private final Map<String, Comparator<Author>> authorComparatorMap = new HashMap<>();
@@ -30,11 +32,13 @@ public class ModelComparators {
   public ModelComparators(AuthorService authorService,
       YearService yearService,
       KeyPhraseService keyPhraseService,
-      VenueService venueService) {
+      VenueService venueService,
+      PaperService paperService) {
     this.authorService = authorService;
     this.yearService = yearService;
     this.keyPhraseService = keyPhraseService;
     this.venueService = venueService;
+    this.paperService = paperService;
 
     initPaperComparatorMap();
     initAuthorComparatorMap();
@@ -45,15 +49,18 @@ public class ModelComparators {
 
   private void initPaperComparatorMap() {
     paperComparatorMap.put("title", Comparator.comparing(Paper::getTitle));
-    paperComparatorMap.put("authors", Comparator.comparingInt(p -> p.getAuthors().size()));
-    paperComparatorMap.put("inCitations", Comparator.comparingInt(p -> p.getInCitations().size()));
     paperComparatorMap
-        .put("outCitations", Comparator.comparingInt(p -> p.getOutCitations().size()));
-    paperComparatorMap.put("keyPhrases", Comparator.comparingInt(p -> p.getKeyPhrases().size()));
+        .put("authors", Comparator.comparingInt(p -> paperService.getAuthorsByPaper(p).size()));
+    paperComparatorMap.put("inCitations",
+        Comparator.comparingInt(p -> paperService.getInCitationsByPaper(p).size()));
+    paperComparatorMap.put("outCitations",
+        Comparator.comparingInt(p -> paperService.getOutCitationsByPaper(p).size()));
+    paperComparatorMap.put("keyPhrases",
+        Comparator.comparingInt(p -> paperService.getKeyPhrasesByPaper(p).size()));
     paperComparatorMap.put("pdfUrls", Comparator.comparingInt(p -> p.getPdfUrls().size()));
     paperComparatorMap.put("s2Url", Comparator.comparing(Paper::getS2Url));
-    paperComparatorMap.put("venue", Comparator.comparing(Paper::getVenue));
-    paperComparatorMap.put("year", Comparator.comparingInt(Paper::getYear));
+    paperComparatorMap.put("venue", Comparator.comparing(paperService::getVenueByPaper));
+    paperComparatorMap.put("year", Comparator.comparingInt(paperService::getYearByPaper));
     paperComparatorMap.put("abstract", Comparator.comparing(Paper::getPaperAbstract));
   }
 

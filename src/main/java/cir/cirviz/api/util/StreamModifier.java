@@ -2,7 +2,9 @@ package cir.cirviz.api.util;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StreamModifier<T> {
@@ -22,7 +24,9 @@ public class StreamModifier<T> {
       stream = stream.sorted(comparator);
     }
     if (!asc) {
-      stream = stream.sorted(Collections.reverseOrder());
+      List<T> list = stream.collect(Collectors.toList());
+      Collections.reverse(list);
+      stream = list.stream();
     }
     return stream.limit(limit);
   }

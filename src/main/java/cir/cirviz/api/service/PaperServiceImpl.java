@@ -30,14 +30,13 @@ public class PaperServiceImpl implements PaperService {
     if (paper == null) {
       return Collections.emptyList();
     } else {
-      return paper.getAuthors();
+      return getAuthorsByPaperId(paper.getId());
     }
   }
 
   @Override
   public List<Author> getAuthorsByPaperId(String paperId) {
-    Paper paper = getPaperById(paperId);
-    return getAuthorsByPaper(paper);
+    return paperRepository.getPaperToAuthors().getOrDefault(paperId, Collections.emptyList());
   }
 
   @Override
@@ -114,6 +113,7 @@ public class PaperServiceImpl implements PaperService {
     return paperRepository.getOutCitations().getOrDefault(paperId, Collections.emptyList());
   }
 
+  @Override
   public Paper getPaperById(String paperId) {
     return paperRepository.getPapers().get(paperId);
   }
